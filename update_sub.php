@@ -17,10 +17,17 @@ try {
     // Log script start
     logMessage("Script started");
 
-    $databases = [$_ENV['DATABASE_ONE'], $_ENV['DATABASE_TWO']];
+    $databases = [];
+    // $databases = [$_ENV['DATABASE_ONE'], $_ENV['DATABASE_TWO']];
 
     $database_table = $_ENV['DB_TABLE'];
     $database_table_column = $_ENV['DB_TABLE_COLUMN'];
+
+    // $current_month = date('m'); //returns the current month with a leading zero. Eg: 01, 02, 03 etc
+    $current_month = date('n'); //returns the current month without a leading zero. Eg: 1, 2, 3 etc
+    $current_year = date('Y');
+
+    echo $current_year . "\n" . $current_month . "\n";
 
     $db_result = [];
 
@@ -36,8 +43,8 @@ try {
                 $countQuery = "SELECT COUNT(*) AS count 
                    FROM $database_table 
                    WHERE status = 10 
-                     AND MONTH($database_table_column) = 8 
-                     AND YEAR($database_table_column) = 2024";
+                     AND MONTH($database_table_column) = $current_month 
+                     AND YEAR($database_table_column) = $current_year";
                 $result = $conn->query($countQuery);
 
                 if ($result) {
@@ -54,8 +61,8 @@ try {
                 $updateQuery = "UPDATE $database_table 
                     SET status = 2 
                     WHERE status = 10 
-                      AND MONTH($database_table_column) = 8 
-                      AND YEAR($database_table_column) = 2024 
+                      AND MONTH($database_table_column) = $current_month 
+                      AND YEAR($database_table_column) = $current_year 
                     LIMIT 2000";
                 try {
                     if ($conn->query($updateQuery) === TRUE) {
@@ -93,7 +100,7 @@ try {
     $mail->SMTPAuth = false; // Set to true if SMTP requires authentication
 
     // Recipients
-    $mail->setFrom($_ENV['NO_REPLY_MAIL'], 'InfoServices');
+    $mail->setFrom($_ENV['NO_REPLY_MAIL'], 'INFOSERVICE SUBSCRIBER STATUS CHANGE');
     $mail->addAddress($_ENV['RECIPIENT_ONE']); // Add a recipient
     $mail->addAddress($_ENV['RECIPIENT_TWO']); // Add a recipient
 
