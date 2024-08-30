@@ -1,24 +1,10 @@
 <?php
-try {
-    require 'vendor/autoload.php'; // Include Composer's autoloader
-    require 'db_connection.php'; // Include the database connection script
-} catch (\Throwable $th) {
-    echo "ERROR OCCURRED @ REQUIRED FILES: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
-    //throw $th;
-}
+require 'vendor/autoload.php';
+require 'db_connection.php';
+
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use Dotenv\Dotenv;
-
-$dotenv = Dotenv::createImmutable(__DIR__);
-$dotenv->load();
-
-// $dbHost = getenv('DB_HOST');
-$dbHost = $_ENV['DB_HOST'];
-
-// echo $dbHost;
-
 
 // Log directory and file setup
 try {
@@ -28,58 +14,69 @@ try {
     }
     $logFile = $logDir . '/subscribers_update_' . date('Y_m_d') . '.log';
 
-// Log script start
+    // Log script start
     logMessage("Script started");
 
-    $databases = [];
+    $databases = [$_ENV['DATABASE_ONE'], $_ENV['DATABASE_TWO']];
 
-    foreach ($databases as $dbname) {
-        $conn = connectToDatabase($dbname);
+    $database_table = $_ENV['DB_TABLE'];
+    $database_table_column = $_ENV['DB_TABLE_COLUMN'];
 
-        if (!$conn) {
-            continue; // Skip to the next database if connection fails
-        }
+    $db_result = [];
 
-        // Get the count of subscribers
-        $countQuery = "SELECT COUNT(*) AS count 
-                   FROM Subscribers 
+    if (count($databases) > 0) {
+
+        foreach ($databases as $dbname) {
+            $conn = connectToDatabase($dbname);
+
+            if (!$conn) {
+                continue; // Skip to the next database if connection fails
+            } else {
+                // Get the count of subscribers
+                $countQuery = "SELECT COUNT(*) AS count 
+                   FROM $database_table 
                    WHERE status = 10 
-                     AND MONTH(lastCharged) = 8 
-                     AND YEAR(lastCharged) = 2024";
-        $result = $conn->query($countQuery);
+                     AND MONTH($database_table_column) = 8 
+                     AND YEAR($database_table_column) = 2024";
+                $result = $conn->query($countQuery);
 
-        if ($result) {
-            $row = $result->fetch_assoc();
-            $subscribersCount = $row['count'];
-            logMessage("Subscribers Count Query successful for $dbname: $subscribersCount subscribers found");
-        } else {
-            logMessage("Subscribers Count Query failed for $dbname: " . $conn->error);
-            $conn->close();
-            continue; // Skip to the next database if query fails
-        }
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $subscribersCount = $row['count'];
+                    logMessage("Subscribers Count Query successful for $dbname: $subscribersCount subscribers found");
+                } else {
+                    logMessage("Subscribers Count Query failed for $dbname: " . $conn->error);
+                    $conn->close();
+                    continue; // Skip to the next database if query fails
+                }
 
-        // Update subscribers
-        $updateQuery = "UPDATE Subscribers 
+                // Update subscribers
+                $updateQuery = "UPDATE $database_table 
                     SET status = 2 
                     WHERE status = 10 
-                      AND MONTH(lastCharged) = 8 
-                      AND YEAR(lastCharged) = 2024 
+                      AND MONTH($database_table_column) = 8 
+                      AND YEAR($database_table_column) = 2024 
                     LIMIT 2000";
-        try {
-            if ($conn->query($updateQuery) === TRUE) {
-                logMessage("Subscribers Update Query successful for $dbname: " . $conn->affected_rows . " subscribers updated");
-            } else {
-                logMessage("Subscribers Update Query failed for $dbname: " . $conn->error);
-            }
-        } catch (\Exception $th) {
-            echo "OPERATION FAILED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
-        }
+                try {
+                    if ($conn->query($updateQuery) === TRUE) {
+                        logMessage("Subscribers Update Query successful for $dbname: " . $conn->affected_rows . " subscribers updated");
+                    } else {
+                        logMessage("Subscribers Update Query failed for $dbname: " . $conn->error);
+                    }
+                } catch (\Exception $th) {
+                    echo "OPERATION FAILED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
+                }
 
-        // Close the database connection
-        $conn->close();
-        logMessage("Database connection closed for $dbname");
+                // Close the database connection
+                $conn->close();
+                logMessage("Database connection closed for $dbname");
+            }
+        }
+    }else {
+        echo "NO DATABASE AVAILABLE";
     }
 } catch (\Throwable $th) {
+    logMessage("ERROR OCCURRED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine());
     echo "ERROR OCCURRED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
     //throw $th;
 }
@@ -97,7 +94,8 @@ try {
 
     // Recipients
     $mail->setFrom($_ENV['NO_REPLY_MAIL'], 'InfoServices');
-    $mail->addAddress($_ENV['RECIPIENT_MAIL']); // Add a recipient
+    $mail->addAddress($_ENV['RECIPIENT_ONE']); // Add a recipient
+    $mail->addAddress($_ENV['RECIPIENT_TWO']); // Add a recipient
 
     // Content
     $mail->isHTML(false); // Set email format to HTML or false

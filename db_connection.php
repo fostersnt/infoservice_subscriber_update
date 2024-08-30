@@ -1,7 +1,13 @@
 <?php
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 // Log function to write messages to the log file
 function logMessage($message) {
     global $logFile;
+    date_default_timezone_set('Africa/Accra');
     $timestamp = date('Y-m-d H:i:s');
     file_put_contents($logFile, "[$timestamp] $message" . PHP_EOL, FILE_APPEND);
 }
