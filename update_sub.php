@@ -31,7 +31,7 @@ try {
 // Log script start
     logMessage("Script started");
 
-    $databases = ["mtninfobox", "mtnJobsDotGo"];
+    $databases = [];
 
     foreach ($databases as $dbname) {
         $conn = connectToDatabase($dbname);
@@ -91,13 +91,13 @@ try {
 
     // Server settings
     $mail->isSMTP();
-    $mail->Host = '62.129.149.147';
-    $mail->Port = 2525;
+    $mail->Host = $_ENV['MAIL_HOST'];
+    $mail->Port = $_ENV['MAIL_PORT'];
     $mail->SMTPAuth = false; // Set to true if SMTP requires authentication
 
     // Recipients
-    $mail->setFrom('no-reply@gwosevo.com', 'InfoServices');
-    $mail->addAddress('foster.asante@gwosevo.com'); // Add a recipient
+    $mail->setFrom($_ENV['NO_REPLY_MAIL'], 'InfoServices');
+    $mail->addAddress($_ENV['RECIPIENT_MAIL']); // Add a recipient
 
     // Content
     $mail->isHTML(false); // Set email format to HTML or false
