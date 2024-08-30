@@ -27,7 +27,7 @@ try {
     $current_month = date('n'); //returns the current month without a leading zero. Eg: 1, 2, 3 etc
     $current_year = date('Y');
 
-    echo $current_year . "\n" . $current_month . "\n";
+    // echo $current_year . "\n" . $current_month . "\n";
 
     $db_result = [];
 
@@ -71,7 +71,8 @@ try {
                         logMessage("Subscribers Update Query failed for $dbname: " . $conn->error);
                     }
                 } catch (\Exception $th) {
-                    echo "OPERATION FAILED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
+                    logMessage("OPERATION FAILED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine());
+                    // echo "OPERATION FAILED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
                 }
 
                 // Close the database connection
@@ -80,11 +81,12 @@ try {
             }
         }
     }else {
-        echo "NO DATABASE AVAILABLE";
+        logMessage("NO DATABASE AVAILABLE");
+        // echo "NO DATABASE AVAILABLE";
     }
 } catch (\Throwable $th) {
     logMessage("ERROR OCCURRED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine());
-    echo "ERROR OCCURRED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
+    // echo "ERROR OCCURRED: " . $th->getMessage() . "\nLINE NUMBER: " . $th->getLine();
     //throw $th;
 }
 
