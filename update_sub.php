@@ -17,8 +17,8 @@ try {
     // Log script start
     logMessage("Script started");
 
-    $databases = [];
-    // $databases = [$_ENV['DATABASE_ONE'], $_ENV['DATABASE_TWO']];
+    // $databases = [];
+    $databases = [$_ENV['DATABASE_ONE'], $_ENV['DATABASE_TWO']];
 
     $database_table = $_ENV['DB_TABLE'];
     $database_table_column = $_ENV['DB_TABLE_COLUMN'];
