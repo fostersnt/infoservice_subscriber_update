@@ -7,9 +7,9 @@ function logMessage($message) {
 }
 
 // Database connection details
-$servername = "62.129.149.141";
-$username = "metabase";
-$password = "metabase#221";
+$servername = $_ENV['DB_HOST'];
+$username = $_ENV['DB_USER'];
+$password = $_ENV['DB_PASSWORD'];
 
 function connectToDatabase($dbname) {
     global $servername, $username, $password;
